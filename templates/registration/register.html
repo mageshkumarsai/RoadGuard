@@ -1,0 +1,313 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+.register-page {
+    min-height: 90vh;
+    padding: 45px 15px;
+    background: linear-gradient(135deg, #dbeafe, #ede9fe, #fce7f3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.register-card {
+    width: 100%;
+    max-width: 850px;
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 18px 55px rgba(31, 41, 85, .15);
+}
+
+.register-header {
+    padding: 35px 25px;
+    text-align: center;
+    color: white;
+    background: linear-gradient(120deg, #2563eb, #6d28d9);
+}
+
+.register-logo {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.register-header h2 {
+    font-size: 29px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.register-header p {
+    margin: 0;
+    color: #e0e7ff;
+}
+
+.register-body {
+    padding: 35px;
+}
+
+.section-title {
+    color: #334155;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 22px 0 15px;
+}
+
+.register-body label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #475569;
+    margin-bottom: 7px;
+}
+
+.register-body input,
+.register-body select,
+.register-body textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #dbe3ef;
+    border-radius: 11px;
+    background: #f8fafc;
+    outline: none;
+    transition: .2s;
+}
+
+.register-body input:focus,
+.register-body select:focus,
+.register-body textarea:focus {
+    border-color: #6366f1;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.form-field {
+    margin-bottom: 17px;
+}
+
+.role-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.role-option {
+    border: 2px solid #e2e8f0;
+    border-radius: 15px;
+    padding: 18px;
+    cursor: pointer;
+    text-align: center;
+    transition: .2s;
+    background: #fff;
+}
+
+.role-option:has(input:checked) {
+    border-color: #6366f1;
+    background: #eef2ff;
+    box-shadow: 0 5px 18px rgba(99, 102, 241, .12);
+}
+
+.role-option input {
+    width: auto;
+    margin-right: 6px;
+}
+
+.role-option strong {
+    display: block;
+    color: #334155;
+    margin-top: 8px;
+}
+
+.role-icon {
+    font-size: 28px;
+}
+
+.provider-fields {
+    display: none;
+    padding: 20px;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.provider-fields.show {
+    display: block;
+}
+
+.register-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(120deg, #2563eb, #7c3aed);
+    color: white;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.register-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, .25);
+}
+
+.login-text {
+    text-align: center;
+    margin-top: 22px;
+    color: #64748b;
+}
+
+.login-text a {
+    color: #4f46e5;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.field-error {
+    color: #dc2626;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+@media(max-width: 600px) {
+    .register-body { padding: 22px; }
+    .form-grid { grid-template-columns: 1fr; gap: 0; }
+    .role-options { grid-template-columns: 1fr; }
+    .register-header h2 { font-size: 24px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-page">
+    <div class="register-card">
+
+        <div class="register-header">
+            <div class="register-logo">🚘</div>
+            <h2>JOIN ROADGUARD</h2>
+            <p>Your journey matters. We're here when you need us.</p>
+        </div>
+
+        <div class="register-body">
+            <h3 class="text-center fw-bold mb-2">Create your account</h3>
+            <p class="text-center text-muted mb-4">
+                Register as a vehicle owner or roadside service provider.
+            </p>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="section-title">👤 Personal Information</div>
+
+                <div class="form-grid">
+                    {% for field in form %}
+                        {% if field.name == "username" or field.name == "first_name" or field.name == "last_name" or field.name == "email" or field.name == "password1" or field.name == "password2" or field.name == "phone" %}
+                            <div class="form-field">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <div class="field-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="section-title">🧭 Choose Your Account Type</div>
+
+                <div class="role-options">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="CUSTOMER"
+                               {% if form.role.value == "CUSTOMER" or not form.role.value %}checked{% endif %}>
+                        <div class="role-icon">🚗</div>
+                        <strong>Vehicle Owner</strong>
+                        <small class="text-muted">I need roadside assistance</small>
+                    </label>
+
+                    <label class="role-option">
+                        <input type="radio" name="role" value="PROVIDER"
+                               {% if form.role.value == "PROVIDER" %}checked{% endif %}>
+                        <div class="role-icon">🛠️</div>
+                        <strong>Service Provider</strong>
+                        <small class="text-muted">I provide roadside services</small>
+                    </label>
+                </div>
+
+                {% if form.role.errors %}
+                    <div class="field-error">{{ form.role.errors }}</div>
+                {% endif %}
+
+                <div class="provider-fields" id="providerFields">
+                    <div class="section-title mt-0">🔧 Business Information</div>
+
+                    {% for field in form %}
+                        {% if field.name == "business_name" or field.name == "service_type" %}
+                            <div class="form-field">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <div class="field-error">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="register-btn">
+                    Create My RoadGuard Account →
+                </button>
+
+                <div class="login-text">
+                    Already registered?
+                    <a href="{% url 'login' %}">Log in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const roles = document.querySelectorAll('input[name="role"]');
+    const providerFields = document.getElementById("providerFields");
+
+    function updateProviderFields() {
+        const selected = document.querySelector('input[name="role"]:checked');
+        const isProvider = selected && selected.value === "PROVIDER";
+
+        providerFields.classList.toggle("show", isProvider);
+
+        providerFields.querySelectorAll("input, select").forEach(function(field) {
+            field.required = isProvider;
+        });
+    }
+
+    roles.forEach(function(role) {
+        role.addEventListener("change", updateProviderFields);
+    });
+
+    updateProviderFields();
+});
+</script>
+{% endblock %}

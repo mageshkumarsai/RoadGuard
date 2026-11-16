@@ -1,0 +1,682 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+:root {
+    --rg-navy: #101b35;
+    --rg-blue: #2563eb;
+    --rg-purple: #7048e8;
+    --rg-muted: #64748b;
+}
+
+.request-page {
+    min-height: 100vh;
+    padding: 35px 15px 55px;
+    background: #f1f5fb;
+    color: #17233d;
+}
+
+.request-container {
+    max-width: 1150px;
+    margin: auto;
+}
+
+.top-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+}
+
+.top-heading h1 {
+    font-size: 27px;
+    font-weight: 850;
+    color: var(--rg-navy);
+    margin: 0;
+}
+
+.top-heading p {
+    color: var(--rg-muted);
+    margin: 6px 0 0;
+}
+
+.request-number {
+    background: #e0eaff;
+    color: #2456c5;
+    padding: 9px 15px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.hero-card {
+    position: relative;
+    overflow: hidden;
+    padding: 32px;
+    border-radius: 23px;
+    color: white;
+    background: linear-gradient(120deg, #101b35, #234b91, #6543bd);
+    box-shadow: 0 14px 35px rgba(30, 64, 175, .18);
+    margin-bottom: 25px;
+}
+
+.hero-card::after {
+    content: "✓";
+    position: absolute;
+    right: 45px;
+    top: 8px;
+    font-size: 150px;
+    font-weight: 900;
+    color: rgba(255,255,255,.07);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.status-label {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 30px;
+    background: #dcfce7;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+}
+
+.hero-card h2 {
+    font-size: 30px;
+    font-weight: 850;
+    margin: 0 0 8px;
+}
+
+.hero-card p {
+    color: #dbeafe;
+    margin: 0;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 23px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 11px;
+    text-decoration: none !important;
+    font-weight: 750;
+    transition: .2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+}
+
+.invoice-btn {
+    background: white;
+    color: #1d4ed8 !important;
+}
+
+.back-btn {
+    border: 1px solid rgba(255,255,255,.4);
+    color: white !important;
+}
+
+.progress-card {
+    background: white;
+    border-radius: 20px;
+    padding: 26px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 22px rgba(15, 23, 42, .05);
+}
+
+.section-heading {
+    font-size: 19px;
+    font-weight: 850;
+    color: var(--rg-navy);
+    margin: 0 0 22px;
+}
+
+.progress-track {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    position: relative;
+    gap: 8px;
+}
+
+.progress-track::before {
+    content: "";
+    height: 4px;
+    position: absolute;
+    top: 19px;
+    left: 12%;
+    right: 12%;
+    background: #dbe3ef;
+}
+
+.progress-step {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    background: #e2e8f0;
+    color: #64748b;
+    font-weight: 900;
+    border: 4px solid white;
+    box-shadow: 0 0 0 1px #dbe3ef;
+}
+
+.progress-step.completed .step-circle {
+    background: #16a34a;
+    color: white;
+    box-shadow: 0 0 0 1px #16a34a;
+}
+
+.progress-step span {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 700;
+}
+
+.progress-step.completed span {
+    color: #15803d;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.info-card {
+    background: white;
+    padding: 24px;
+    border-radius: 19px;
+    box-shadow: 0 5px 22px rgba(15, 23, 42, .05);
+    border: 1px solid #edf1f7;
+    min-width: 0;
+}
+
+.info-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.card-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #edf1f7;
+}
+
+.card-icon {
+    width: 46px;
+    height: 46px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 14px;
+    font-size: 23px;
+    background: #eaf1ff;
+}
+
+.card-heading h3 {
+    font-size: 17px;
+    font-weight: 850;
+    color: var(--rg-navy);
+    margin: 0;
+}
+
+.card-heading small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 11px 0;
+    border-bottom: 1px dashed #e8edf5;
+}
+
+.detail-row:last-child {
+    border-bottom: 0;
+}
+
+.detail-label {
+    color: #8290a5;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.detail-value {
+    color: #26344c;
+    font-size: 14px;
+    font-weight: 750;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.issue-box {
+    background: #f5f7ff;
+    border-left: 4px solid #6366f1;
+    padding: 14px;
+    border-radius: 9px;
+    margin-top: 12px;
+    color: #394867;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.location-banner {
+    background: linear-gradient(120deg, #ecfdf5, #eff6ff);
+    border: 1px solid #d1fae5;
+    padding: 18px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+}
+
+.location-banner strong {
+    display: block;
+    color: #14532d;
+    margin-bottom: 5px;
+}
+
+.location-banner p {
+    color: #527064;
+    margin: 0;
+    font-size: 14px;
+}
+
+.map-btn {
+    display: inline-block;
+    background: linear-gradient(120deg, #059669, #0d9488);
+    color: white !important;
+    padding: 12px 17px;
+    border-radius: 10px;
+    font-weight: 750;
+    text-decoration: none !important;
+    margin-top: 12px;
+}
+
+.provider-highlight {
+    background: linear-gradient(120deg, #eef2ff, #f5f3ff);
+    padding: 16px;
+    border-radius: 13px;
+    margin-bottom: 15px;
+}
+
+.provider-highlight strong {
+    display: block;
+    color: #4338ca;
+    font-size: 18px;
+}
+
+.provider-highlight small {
+    color: #64748b;
+}
+
+.update-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 19px;
+    margin-top: 22px;
+    box-shadow: 0 5px 22px rgba(15, 23, 42, .05);
+}
+
+.update-card select {
+    width: 100%;
+    max-width: 350px;
+    padding: 12px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.update-btn {
+    display: block;
+    background: #2563eb;
+    color: white;
+    border: 0;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+@media(max-width: 700px) {
+    .request-page { padding: 22px 12px; }
+    .top-heading h1 { font-size: 22px; }
+    .hero-card { padding: 24px 20px; }
+    .hero-card h2 { font-size: 25px; }
+    .hero-card::after { right: 10px; font-size: 100px; }
+    .progress-card, .info-card { padding: 19px; }
+    .details-grid { grid-template-columns: 1fr; }
+    .info-card.full-width { grid-column: auto; }
+    .progress-track { gap: 2px; }
+    .progress-step span { font-size: 10px; }
+    .step-circle { width: 34px; height: 34px; font-size: 12px; }
+    .progress-track::before { top: 16px; }
+    .detail-row { gap: 8px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="request-page">
+<div class="request-container">
+
+    <div class="top-heading">
+        <div>
+            <h1>Assistance Request Details</h1>
+            <p>{% if is_owner %}Track your roadside assistance request with RoadGuard.{% else %}Roadside assistance request details.{% endif %}</p>
+        </div>
+        <div class="request-number">REQUEST #{{ item.pk }}</div>
+    </div>
+
+    <div class="hero-card">
+        <div class="hero-content">
+            <span class="status-label">
+                {{ item.get_status_display|upper }}
+            </span>
+
+            {% if item.status == "RESOLVED" %}
+                <h2>Assistance Completed!</h2>
+                <p>This roadside assistance request has been successfully resolved{% if item.completed_at %} on {{ item.completed_at|date:"d M Y, h:i A" }}{% endif %}.</p>
+            {% elif item.status == "IN_PROGRESS" %}
+                <h2>Service in Progress</h2>
+                <p>{% if is_owner %}Your provider is currently working on your request.{% else %}Work on this request is in progress.{% endif %}</p>
+            {% elif item.status == "ACCEPTED" %}
+                <h2>Provider Assigned</h2>
+                <p>{% if is_owner %}{{ item.provider.business_name }} has accepted your request and is on the way.{% else %}This request has been accepted by a service provider.{% endif %}</p>
+            {% elif item.status == "CANCELLED" %}
+                <h2>Request Cancelled</h2>
+                <p>This roadside assistance request has been cancelled.</p>
+            {% else %}
+                <h2>Waiting for a Provider</h2>
+                <p>{% if is_owner %}Your request is visible to available providers within 10 km.{% else %}This request is open and waiting for a provider.{% endif %}</p>
+            {% endif %}
+
+            <div class="hero-actions">
+                {% if can_download_receipt %}
+                    <a class="action-btn invoice-btn"
+                       href="{% url 'download_invoice' item.pk %}">
+                        📄 Download Receipt PDF
+                    </a>
+                {% endif %}
+                <a class="action-btn back-btn"
+                   href="{% url 'dashboard' %}">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-card">
+        <h3 class="section-heading">Your Assistance Journey</h3>
+
+        <div class="progress-track">
+            <div class="progress-step {% if item.status != 'CANCELLED' %}completed{% endif %}">
+                <div class="step-circle">1</div>
+                <span>Submitted</span>
+            </div>
+
+            <div class="progress-step {% if item.status == 'ACCEPTED' or item.status == 'IN_PROGRESS' or item.status == 'RESOLVED' %}completed{% endif %}">
+                <div class="step-circle">2</div>
+                <span>Accepted</span>
+            </div>
+
+            <div class="progress-step {% if item.status == 'IN_PROGRESS' or item.status == 'RESOLVED' %}completed{% endif %}">
+                <div class="step-circle">3</div>
+                <span>In Progress</span>
+            </div>
+
+            <div class="progress-step {% if item.status == 'RESOLVED' %}completed{% endif %}">
+                <div class="step-circle">4</div>
+                <span>Resolved</span>
+            </div>
+        </div>
+
+        {% if item.status == "CANCELLED" %}
+            <p class="text-danger mt-3 mb-0">
+                This request was cancelled. The progress tracker does not indicate completion.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="details-grid">
+
+        <!-- Vehicle Details -->
+        <div class="info-card">
+            <div class="card-heading">
+                <div class="card-icon">🚗</div>
+                <div>
+                    <h3>Vehicle & Service</h3>
+                    <small>Your breakdown information</small>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Service Requested</span>
+                <span class="detail-value">{{ item.get_service_needed_display }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Vehicle</span>
+                <span class="detail-value">{{ item.vehicle }}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Request Date</span>
+                <span class="detail-value">{{ item.created_at|date:"d M Y, h:i A" }}</span>
+            </div>
+
+            <div class="issue-box">
+                <strong>Issue Description</strong><br>
+                {{ item.issue_description }}
+            </div>
+        </div>
+
+        <!-- Customer Details -->
+        <div class="info-card">
+            <div class="card-heading">
+                <div class="card-icon">👤</div>
+                <div>
+                    <h3>Customer Details</h3>
+                    <small>Request owner information</small>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Customer Name</span>
+                <span class="detail-value">
+                    {{ item.customer.get_full_name|default:item.customer.username }}
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Contact Number</span>
+                <span class="detail-value">{% if show_contact %}<a href="tel:{{ item.phone }}">{{ item.phone }}</a>{% else %}Shown after you accept{% endif %}</span>
+            </div>
+        </div>
+
+        <!-- Location -->
+        <div class="info-card full-width">
+            <div class="card-heading">
+                <div class="card-icon">📍</div>
+                <div>
+                    <h3>Breakdown Location</h3>
+                    <small>Where roadside assistance is required</small>
+                </div>
+            </div>
+
+            <div class="location-banner">
+                <strong>📌 Breakdown Address</strong>
+                <p>
+                    {{ item.location_text|default:"Street or area not provided" }},
+                    {{ item.city }}, {{ item.district }}, {{ item.state }}
+                </p>
+            </div>
+
+            <div class="details-grid">
+                <div>
+                    <div class="detail-row">
+                        <span class="detail-label">State</span>
+                        <span class="detail-value">{{ item.state|default:"Not provided" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">District</span>
+                        <span class="detail-value">{{ item.district|default:"Not provided" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">City / Town</span>
+                        <span class="detail-value">{{ item.city|default:"Not provided" }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="detail-row">
+                        <span class="detail-label">Latitude</span>
+                        <span class="detail-value">{{ item.latitude|default:"Not available" }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Longitude</span>
+                        <span class="detail-value">{{ item.longitude|default:"Not available" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if item.latitude and item.longitude %}
+                <a class="map-btn"
+                   target="_blank"
+                   rel="noopener"
+                   href="https://www.google.com/maps?q={{ item.latitude }},{{ item.longitude }}">
+                    🗺️ View Breakdown Location on Map
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- Provider Details -->
+        <div class="info-card full-width">
+            <div class="card-heading">
+                <div class="card-icon">🔧</div>
+                <div>
+                    <h3>Service Provider</h3>
+                    <small>Your assigned roadside assistance partner</small>
+                </div>
+            </div>
+
+            {% if item.provider %}
+                <div class="provider-highlight">
+                    <strong>{{ item.provider.business_name }}</strong>
+                    <small>Assigned service provider</small>
+                </div>
+
+                <div class="details-grid">
+                    <div>
+                        <div class="detail-row">
+                            <span class="detail-label">Business Name</span>
+                            <span class="detail-value">{{ item.provider.business_name }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Service Type</span>
+                            <span class="detail-value">{{ item.provider.get_service_type_display }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="detail-row">
+                            <span class="detail-label">Contact Number</span>
+                            <span class="detail-value">{{ item.provider.phone }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value">{{ item.provider.address|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-muted mb-0">
+                    No service provider has accepted this request yet.
+                </p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% if item.progress_note or item.accepted_at or item.started_at or item.completed_at %}
+        <div class="info-card full-width mt-3">
+            <div class="card-heading">
+                <div class="card-icon">🕒</div>
+                <div><h3>Service Timeline</h3><small>Progress recorded by the provider</small></div>
+            </div>
+            <div class="detail-row"><span class="detail-label">Requested</span><span class="detail-value">{{ item.created_at|date:"d M Y, h:i A" }}</span></div>
+            {% if item.accepted_at %}<div class="detail-row"><span class="detail-label">Accepted</span><span class="detail-value">{{ item.accepted_at|date:"d M Y, h:i A" }}</span></div>{% endif %}
+            {% if item.started_at %}<div class="detail-row"><span class="detail-label">Work started</span><span class="detail-value">{{ item.started_at|date:"d M Y, h:i A" }}</span></div>{% endif %}
+            {% if item.completed_at %}<div class="detail-row"><span class="detail-label">Completed</span><span class="detail-value">{{ item.completed_at|date:"d M Y, h:i A" }}</span></div>{% endif %}
+            {% if item.progress_note %}<div class="issue-box"><strong>Provider note</strong><br>{{ item.progress_note }}</div>{% endif %}
+        </div>
+    {% endif %}
+
+    {% if is_eligible_provider %}
+        <div class="update-card">
+            <h3 class="section-heading">📍 Open request{% if distance_km is not None %} · {{ distance_km }} km from you{% endif %}</h3>
+            <p class="text-muted">Accept this request if you can reach the customer. Only one provider can accept it.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <form method="POST" action="{% url 'accept_request' item.pk %}">{% csrf_token %}<button type="submit" class="update-btn">✔ Accept request</button></form>
+                <form method="POST" action="{% url 'reject_request' item.pk %}" onsubmit="return confirm('Reject this request?');">{% csrf_token %}<button type="submit" class="update-btn" style="background:#c0392b">✖ Reject</button></form>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if is_assigned_provider or user.is_staff %}
+        {% if next_step %}
+        <div class="update-card">
+            <h3 class="section-heading">⚙️ Update Service Status</h3>
+            <p class="text-muted">Current status: <strong>{{ item.get_status_display }}</strong>. The next allowed step is shown below.</p>
+            <form method="POST" action="{% url 'update_status' item.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="{{ next_step.0 }}">
+                <label for="progress_note" class="fw-bold">Progress note for the customer (optional)</label>
+                <textarea name="progress_note" id="progress_note" rows="2" maxlength="500" class="form-control mb-3">{{ item.progress_note }}</textarea>
+                <button type="submit" class="update-btn">{{ next_step.1 }} →</button>
+            </form>
+        </div>
+        {% endif %}
+    {% endif %}
+
+    {% if can_cancel %}
+        <div class="update-card">
+            <h3 class="section-heading">Cancel this request</h3>
+            <p class="text-muted">You can cancel until the provider starts work.</p>
+            <form method="POST" action="{% url 'cancel_request' item.pk %}" onsubmit="return confirm('Cancel this request?');">
+                {% csrf_token %}
+                <button type="submit" class="update-btn" style="background:#c0392b">Cancel request</button>
+            </form>
+        </div>
+    {% endif %}
+
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if is_provider %}Request map{% else %}Provider map{% endif %} | RoadGuard{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  {% if is_provider %}
+    <span class="eyebrow text-primary">NEARBY REQUESTS</span>
+    <h1 class="h2 fw-bold mt-2">Open requests within 10 km</h1>
+    {% if not has_location %}
+      <div class="alert alert-warning mt-3">Add your GPS location in <a href="{% url 'provider_profile' %}">your profile</a> to see nearby requests.</div>
+    {% else %}
+      <p class="text-secondary">Click a marker for request details. The blue circle shows your 10 km service radius.</p>
+    {% endif %}
+  {% else %}
+    <span class="eyebrow text-primary">LOCATION NETWORK</span>
+    <h1 class="h2 fw-bold mt-2">RoadGuard service map</h1>
+    <p class="text-secondary">Available providers who have added map coordinates are shown below. Confirm availability and response times directly.</p>
+  {% endif %}
+  <div id="providerMap" class="map-large"></div>
+  <div class="small text-secondary mt-2">Map data © OpenStreetMap contributors. Locations are entered by users and are not live GPS tracking.</div>
+</div>
+{{ map_data|json_script:"map-data" }}
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'js/rg-map.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Access denied | RoadGuard{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+  <div class="narrow-wrap text-center content-card">
+    <div style="font-size:3rem">🚫</div>
+    <h1 class="h3 fw-bold mt-2">Access denied</h1>
+    <p class="text-secondary">{{ message }}</p>
+    <a class="btn btn-primary" href="{% url 'dashboard' %}">Go to my dashboard</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Provider dashboard | RoadGuard{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">{% endblock %}
+{% block content %}
+<div class="container page-wrap">
+
+  <div class="dash-hero d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <span class="eyebrow">SERVICE PROVIDER</span>
+      <h1 class="h2 fw-bold mt-2">{{ provider.business_name }}</h1>
+      <p class="mb-0">{{ provider.get_service_type_display }} · {% if provider.is_available %}<span class="text-success-emphasis fw-semibold" style="color:#7ee2b8!important">● Available</span>{% else %}Unavailable{% endif %}</p>
+    </div>
+    <a class="btn btn-warning" href="{% url 'provider_profile' %}"><i class="bi bi-geo-alt"></i> Edit profile &amp; location</a>
+  </div>
+
+  {% if not has_location %}
+  <div class="alert alert-warning">
+    <strong>Your GPS location is missing.</strong> Requests within {{ radius_km }} km are shown only after you
+    <a href="{% url 'provider_profile' %}">add your location</a>.
+  </div>
+  {% elif not provider.is_available %}
+  <div class="alert alert-warning">You are marked <strong>unavailable</strong>, so no open requests are shown. <a href="{% url 'provider_profile' %}">Change availability</a>.</div>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3"><div class="stat-tile"><i class="bi bi-broadcast"></i><div class="num">{{ open_requests|length }}</div><div class="lbl">Open within {{ radius_km }} km</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-tile"><i class="bi bi-tools"></i><div class="num">{{ assigned_requests|length }}</div><div class="lbl">Active jobs</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-tile"><i class="bi bi-check-circle"></i><div class="num">{{ completed_requests|length }}</div><div class="lbl">Completed</div></div></div>
+    <div class="col-6 col-md-3"><div class="stat-tile"><i class="bi bi-bullseye"></i><div class="num">{{ radius_km }} km</div><div class="lbl">Service radius</div></div></div>
+  </div>
+
+  <div class="content-card mb-4">
+    <h2 class="h5 fw-bold">Nearby request map</h2>
+    <p class="text-secondary small mb-2">
+      <span class="legend-dot" style="background:#1769aa;margin-left:0"></span>You
+      <span class="legend-dot" style="background:#e0a100"></span>Open request
+      <span class="legend-dot" style="background:#19a974"></span>Your active job
+    </p>
+    <div id="providerMap" class="map-panel"></div>
+  </div>
+
+  <div class="content-card mb-4">
+    <h2 class="h5 fw-bold">Open requests near you</h2>
+    <p class="text-secondary">Accept work you can provide, or reject requests that do not suit you. Only one provider can accept each request.</p>
+    <div class="row g-3">
+      {% for item in open_requests %}
+      <div class="col-lg-6">
+        <div class="job-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <strong>Request #{{ item.id }}</strong>
+            <span class="dist-pill"><i class="bi bi-geo-alt"></i> {{ item.distance_km }} km away</span>
+          </div>
+          <h3 class="h6 mb-0">{{ item.get_service_needed_display }} · {{ item.vehicle }}</h3>
+          <p class="mb-1">{{ item.issue_description|truncatechars:130 }}</p>
+          <div class="meta"><i class="bi bi-pin-map"></i> {{ item.location_text|default:"Street not provided" }}{% if item.city %}, {{ item.city }}{% endif %}</div>
+          <div class="meta"><i class="bi bi-clock"></i> {{ item.created_at|timesince }} ago</div>
+          <div class="actions">
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'request_detail' item.pk %}">View details</a>
+            <form method="post" action="{% url 'accept_request' item.pk %}">{% csrf_token %}<button class="btn btn-success btn-sm"><i class="bi bi-check2-circle"></i> Accept</button></form>
+            <form method="post" action="{% url 'reject_request' item.pk %}" onsubmit="return confirm('Reject this request? It will be hidden from your list.');">{% csrf_token %}<button class="btn btn-outline-danger btn-sm"><i class="bi bi-x-circle"></i> Reject</button></form>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12"><div class="empty-state">There are no open requests within {{ radius_km }} km right now. This page shows live data — refresh to check again.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="content-card mb-4">
+    <h2 class="h5 fw-bold">Assigned requests</h2>
+    <div class="row g-3">
+      {% for item in assigned_requests %}
+      <div class="col-lg-6">
+        <div class="job-card assigned">
+          <div class="d-flex justify-content-between align-items-start">
+            <strong>Request #{{ item.id }} · {{ item.vehicle }}</strong>
+            <span class="status-badge status-{{ item.status|lower }}">{{ item.get_status_display }}</span>
+          </div>
+          <div class="meta">Customer: {{ item.customer.get_full_name|default:item.customer.username }} · <a href="tel:{{ item.phone }}">{{ item.phone }}</a></div>
+          <div class="meta"><i class="bi bi-pin-map"></i> {{ item.location_text|default:"Street not provided" }}{% if item.city %}, {{ item.city }}{% endif %}</div>
+          <div class="actions">
+            <a class="btn btn-primary btn-sm" href="{% url 'request_detail' item.pk %}">Manage job →</a>
+            {% with step=item.next_provider_step %}{% if step %}
+            <form method="post" action="{% url 'update_status' item.pk %}">{% csrf_token %}<input type="hidden" name="status" value="{{ step.0 }}"><button class="btn btn-success btn-sm">{{ step.1 }}</button></form>
+            {% endif %}{% endwith %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12"><div class="empty-state">No active jobs. Accept an open request to get started.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if completed_requests %}
+  <div class="content-card">
+    <h2 class="h5 fw-bold">Completed jobs</h2>
+    {% for item in completed_requests %}
+      <div class="list-row"><div><strong>Request #{{ item.id }} · {{ item.vehicle }}</strong><div class="text-secondary small">Completed {{ item.completed_at|date:"d M Y H:i"|default:"—" }}</div></div><a href="{% url 'request_detail' item.pk %}">View →</a></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{{ map_data|json_script:"map-data" }}
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'js/rg-map.js' %}"></script>
+{% endblock %}

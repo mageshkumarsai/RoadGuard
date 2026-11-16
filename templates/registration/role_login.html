@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container" style="max-width: 760px;">
+    <div class="text-center mb-4">
+      <span class="badge text-bg-primary mb-2">WELCOME BACK</span>
+      <h1 class="fw-bold">Choose your login</h1>
+      <p class="text-secondary">Select the account type you registered with.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm border-0">
+          <div class="card-body p-4 text-center">
+            <h2 class="h4 fw-bold">Vehicle owner</h2>
+            <p class="text-secondary">Create and track roadside assistance requests.</p>
+            <a class="btn btn-primary w-100" href="{% url 'customer_login' %}">Customer login</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100 shadow-sm border-0">
+          <div class="card-body p-4 text-center">
+            <h2 class="h4 fw-bold">Service provider</h2>
+            <p class="text-secondary">Manage your provider profile and service requests.</p>
+            <a class="btn btn-success w-100" href="{% url 'provider_login' %}">Provider login</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

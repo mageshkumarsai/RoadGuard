@@ -1,0 +1,251 @@
+
+{% extends "base.html" %}
+{% block title %}RoadGuard | Roadside assistance{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+  <div class="container py-5">
+    <div class="row align-items-center g-4">
+
+      <div class="col-lg-7">
+        <span class="eyebrow">ROADside ASSISTANCE, REIMAGINED</span>
+
+        <h1 class="display-4 fw-bold mt-3">
+          Help is closer<br>
+          <span class="text-accent">than you think.</span>
+        </h1>
+
+        <p class="lead text-light-emphasis mt-3">
+          Connect with mechanics and towing providers when your vehicle needs help.
+          Share your location and create an assistance request in minutes.
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 mt-4">
+
+          {% if user.is_authenticated %}
+
+            <a class="btn btn-warning btn-lg"
+               href="{% url 'create_request' %}">
+              Request assistance
+            </a>
+
+            <a class="btn btn-outline-light btn-lg"
+               href="{% url 'dashboard' %}">
+              My dashboard
+            </a>
+
+          {% else %}
+
+            <a class="btn btn-warning btn-lg"
+               href="{% url 'register' %}">
+              Get started
+            </a>
+
+          {% endif %}
+
+        </div>
+
+        <div class="hero-note mt-4">
+          For breakdowns, flat tyres, battery issues and towing needs.
+        </div>
+
+      </div>
+
+      <div class="col-lg-5">
+        <div class="hero-panel">
+
+          <div class="map-visual">
+            <div class="map-road road-one"></div>
+            <div class="map-road road-two"></div>
+            <div class="map-pin pin-main">●</div>
+            <div class="map-pin pin-small">+</div>
+
+            <div class="map-label">
+              <span class="pulse"></span>
+              Location-based assistance
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              <small class="text-secondary">ROADGUARD NETWORK</small>
+              <div class="fw-bold">Mechanics · Towing · Support</div>
+            </div>
+            <span class="status-dot">Prototype</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- SEPARATE LOGIN SECTION -->
+
+{% if not user.is_authenticated %}
+
+<section class="container py-5">
+
+  <div class="text-center mb-4">
+    <span class="eyebrow text-primary">WELCOME TO ROADGUARD</span>
+    <h2 class="fw-bold mt-2">Choose Your Login</h2>
+    <p class="text-secondary">
+      Select your account type to continue.
+    </p>
+  </div>
+
+  <div class="row justify-content-center g-4">
+
+    <!-- CUSTOMER LOGIN -->
+
+    <div class="col-md-5">
+      <div class="feature-card text-center h-100 p-4">
+
+        <div style="font-size:45px;">🚗</div>
+
+        <h4 class="fw-bold mt-3">Customer Login</h4>
+
+        <p class="text-secondary">
+          Facing a vehicle breakdown? Log in to request roadside assistance
+          and manage your service requests.
+        </p>
+
+        <a href="{% url 'customer_login' %}?next={% url 'customer_dashboard' %}"
+           class="btn btn-primary btn-lg w-100 mt-3">
+          Customer Login →
+        </a>
+
+        <p class="small text-secondary mt-3 mb-0">
+          New customer?
+          <a href="{% url 'register' %}">Create an account</a>
+        </p>
+
+      </div>
+    </div>
+
+
+    <!-- SERVICE PROVIDER LOGIN -->
+
+    <div class="col-md-5">
+      <div class="feature-card text-center h-100 p-4">
+
+        <div style="font-size:45px;">🔧</div>
+
+        <h4 class="fw-bold mt-3">Service Provider Login</h4>
+
+        <p class="text-secondary">
+          Are you a mechanic or towing provider? Log in to view nearby
+          assistance requests and manage assigned services.
+        </p>
+
+        <a href="{% url 'provider_login' %}?next={% url 'provider_dashboard' %}"
+           class="btn btn-success btn-lg w-100 mt-3">
+          Provider Login →
+        </a>
+
+        <p class="small text-secondary mt-3 mb-0">
+          New provider?
+          <a href="{% url 'register' %}">Register as provider</a>
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+{% endif %}
+
+
+<!-- HOW IT WORKS -->
+
+<section class="container py-5">
+
+  <div class="section-heading">
+    <span class="eyebrow text-primary">HOW IT WORKS</span>
+    <h2 class="fw-bold mt-2">Roadside help in three steps</h2>
+  </div>
+
+  <div class="row g-3 mt-2">
+
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="feature-number">01</div>
+        <h5>Share your location</h5>
+        <p>Allow location access or enter your location details.</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="feature-number">02</div>
+        <h5>Request a service</h5>
+        <p>Tell us what happened and choose a mechanic or towing service.</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="feature-card">
+        <div class="feature-number">03</div>
+        <h5>Track your request</h5>
+        <p>View provider acceptance and request status from your dashboard.</p>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- AVAILABLE PROVIDERS -->
+
+<section class="container pb-5">
+
+  <div class="d-flex justify-content-between align-items-end mb-3">
+
+    <div>
+      <span class="eyebrow text-primary">SERVICE NETWORK</span>
+      <h2 class="fw-bold mt-2 mb-0">Available providers</h2>
+    </div>
+
+    <a href="{% url 'map' %}" class="btn btn-outline-primary">
+      View map
+    </a>
+
+  </div>
+
+  <div class="row g-3">
+
+    {% for provider in providers %}
+
+      <div class="col-md-4">
+        <div class="provider-card">
+          <span class="provider-icon">✦</span>
+          <h5>{{ provider.business_name }}</h5>
+          <p>{{ provider.get_service_type_display }}</p>
+          <small>
+            {{ provider.address|default:"Location details available after contacting provider" }}
+          </small>
+        </div>
+      </div>
+
+    {% empty %}
+
+      <div class="col-12">
+        <div class="empty-state">
+          Provider listings will appear here once service providers register
+          and add their location.
+        </div>
+      </div>
+
+    {% endfor %}
+
+  </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,552 @@
+
+{% extends "base.html" %}
+
+{% block title %}Create Assistance Request | RoadGuard{% endblock %}
+
+{% block extra_head %}
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+    .request-page {
+        max-width: 1200px;
+        margin: 35px auto;
+        padding: 0 15px;
+    }
+
+    .request-header {
+        background: linear-gradient(135deg, #164e9b, #2878d0);
+        color: white;
+        padding: 30px;
+        border-radius: 18px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(22, 78, 155, 0.15);
+    }
+
+    .request-header h1 {
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .request-layout {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 25px;
+        align-items: start;
+    }
+
+    .request-card {
+        background: white;
+        padding: 28px;
+        border-radius: 18px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+        border: 1px solid #edf0f5;
+    }
+
+    .section-heading {
+        color: #164e9b;
+        font-weight: 750;
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .request-form label {
+        display: block;
+        font-weight: 650;
+        margin-bottom: 8px;
+        color: #25344a;
+    }
+
+    .request-form input:not([type="hidden"]),
+    .request-form select,
+    .request-form textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dce3ed;
+        border-radius: 10px;
+        background: #fbfcfe;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .request-form input:focus,
+    .request-form select:focus,
+    .request-form textarea:focus {
+        border-color: #2878d0;
+        box-shadow: 0 0 0 3px rgba(40, 120, 208, 0.12);
+        background: white;
+    }
+
+    .request-form textarea {
+        resize: vertical;
+    }
+
+    .field-error {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+
+    .map-container {
+        height: 390px;
+        width: 100%;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #dce3ed;
+        z-index: 1;
+    }
+
+    .map-info {
+        background: #eff6ff;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 15px;
+        color: #164e9b;
+        font-size: 14px;
+    }
+
+    .location-btn {
+        background: #eaf3ff;
+        color: #1764b2;
+        border: 1px solid #b8d5f5;
+        padding: 11px 16px;
+        border-radius: 10px;
+        font-weight: 650;
+        margin-top: 15px;
+        cursor: pointer;
+    }
+
+    .location-btn:hover {
+        background: #d8eaff;
+    }
+
+    .submit-request {
+        width: 100%;
+        border: none;
+        background: linear-gradient(135deg, #1764b2, #3289e8);
+        color: white;
+        padding: 15px;
+        border-radius: 11px;
+        font-size: 16px;
+        font-weight: 750;
+        margin-top: 20px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .submit-request:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(40, 120, 208, 0.25);
+    }
+
+    .map-note {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 12px;
+    }
+
+    @media (max-width: 850px) {
+        .request-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .request-header {
+            padding: 22px;
+        }
+
+        .request-card {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="request-page">
+
+    <div class="request-header">
+        <h1>Request Roadside Assistance</h1>
+        <p class="mb-0">
+            Tell us about your vehicle problem. RoadGuard will help you
+            connect with a nearby service provider.
+        </p>
+    </div>
+
+    <div class="request-layout">
+
+        <!-- LEFT: REQUEST FORM -->
+
+        <div class="request-card">
+
+            <h3 class="section-heading">
+                <i class="bi bi-clipboard-check"></i>
+                Assistance Details
+            </h3>
+
+            <form method="post" class="request-form">
+
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors|striptags }}</div>
+                {% endif %}
+
+                {% for field in form %}
+
+                    {% if field.is_hidden %}
+                        {{ field }}
+                    {% else %}
+                    <div class="mb-3">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+
+                            {% if field.field.required %}
+                                <span style="color:#e05252">*</span>
+                            {% endif %}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <small class="text-muted">
+                                {{ field.help_text }}
+                            </small>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="field-error">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+
+                    </div>
+                    {% endif %}
+
+                {% endfor %}
+
+                <button
+                    type="button"
+                    id="locateBtn"
+                    class="location-btn"
+                >
+                    <i class="bi bi-geo-alt-fill"></i>
+                    Use My Current Location
+                </button>
+
+                <button type="submit" class="submit-request">
+                    Submit Assistance Request
+                    <i class="bi bi-arrow-right-circle"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- RIGHT: MAP -->
+
+        <div class="request-card">
+
+            <h3 class="section-heading">
+                <i class="bi bi-map"></i>
+                Select Your Location
+            </h3>
+
+            <p class="text-muted">
+                Click on the map or use your current location to mark
+                where your vehicle has broken down.
+            </p>
+
+            <div id="requestMap" class="map-container"></div>
+
+            <button
+                type="button"
+                id="locateBtnMap"
+                class="location-btn"
+            >
+                <i class="bi bi-crosshair"></i>
+                Find My Location
+            </button>
+
+            <div class="map-info">
+                <strong>
+                    <i class="bi bi-info-circle"></i>
+                    Location Information
+                </strong>
+
+                <p id="locationMessage" class="mb-0 mt-2">
+                    Select a location on the map.
+                </p>
+            </div>
+
+            <p class="map-note">
+                You can drag the map marker to adjust your exact location.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{{ block.super }}
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // =====================================
+    // DISTRICT AND CITY DROPDOWNS
+    // =====================================
+
+    const districtSelect = document.getElementById("id_district");
+    const citySelect = document.getElementById("id_city");
+
+    if (districtSelect && citySelect) {
+
+        let citiesByDistrict = {};
+
+        try {
+            citiesByDistrict = JSON.parse(
+                districtSelect.dataset.cities || "{}"
+            );
+        } catch (error) {
+            console.error("Unable to load city data:", error);
+        }
+
+        function populateCities(district, selectedCity = "") {
+
+            citySelect.innerHTML = "";
+
+            citySelect.add(
+                new Option("Select City / Town", "")
+            );
+
+            const cities = citiesByDistrict[district] || [];
+
+            cities.forEach(function (city) {
+                citySelect.add(new Option(city, city));
+            });
+
+            if (cities.includes(selectedCity)) {
+                citySelect.value = selectedCity;
+            }
+        }
+
+        const existingCity = citySelect.value;
+
+        populateCities(districtSelect.value, existingCity);
+
+        districtSelect.addEventListener("change", function () {
+            populateCities(districtSelect.value);
+        });
+    }
+
+
+    // =====================================
+    // MAP INITIALIZATION
+    // =====================================
+
+    const latInput = document.getElementById("id_latitude");
+    const lngInput = document.getElementById("id_longitude");
+    const message = document.getElementById("locationMessage");
+    const locateBtn = document.getElementById("locateBtn");
+    const locateBtnMap = document.getElementById("locateBtnMap");
+
+    if (!latInput || !lngInput || !message || !locateBtn) {
+        console.error("RoadGuard location fields are missing.");
+        return;
+    }
+
+    if (typeof L === "undefined") {
+        message.textContent = "Map could not be loaded. Please refresh the page.";
+        return;
+    }
+
+    const map = L.map("requestMap").setView(
+        [11.1271, 78.6569],
+        7
+    );
+
+    L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            referrerPolicy: "strict-origin-when-cross-origin",
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }
+    ).addTo(map);
+
+    let marker = null;
+
+
+    // =====================================
+    // SET LOCATION MARKER
+    // =====================================
+
+    function setPoint(lat, lng) {
+
+        latInput.value = Number(lat).toFixed(6);
+        lngInput.value = Number(lng).toFixed(6);
+
+        if (marker) {
+
+            marker.setLatLng([lat, lng]);
+
+        } else {
+
+            marker = L.marker(
+                [lat, lng],
+                { draggable: true }
+            ).addTo(map);
+
+            marker.on("dragend", function (event) {
+
+                const point = event.target.getLatLng();
+
+                latInput.value = point.lat.toFixed(6);
+                lngInput.value = point.lng.toFixed(6);
+
+                message.textContent =
+                    "Location updated successfully.";
+
+            });
+        }
+
+        map.setView([lat, lng], 15);
+
+        message.textContent =
+            "Location selected: " +
+            lat.toFixed(5) + ", " + lng.toFixed(5);
+    }
+
+
+    // =====================================
+    // EXISTING LOCATION
+    // =====================================
+
+    const existingLat = parseFloat(latInput.value);
+    const existingLng = parseFloat(lngInput.value);
+
+    if (
+        Number.isFinite(existingLat) &&
+        Number.isFinite(existingLng)
+    ) {
+        setPoint(existingLat, existingLng);
+    }
+
+
+    // =====================================
+    // SELECT LOCATION BY CLICKING MAP
+    // =====================================
+
+    map.on("click", function (event) {
+
+        setPoint(
+            event.latlng.lat,
+            event.latlng.lng
+        );
+
+    });
+
+
+    // =====================================
+    // CURRENT GPS LOCATION
+    // =====================================
+
+    function getCurrentLocation() {
+
+        if (!navigator.geolocation) {
+
+            message.textContent =
+                "Your browser does not support location access.";
+
+            return;
+        }
+
+        message.textContent =
+            "Finding your current location...";
+
+        locateBtn.disabled = true;
+
+        if (locateBtnMap) {
+            locateBtnMap.disabled = true;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+
+            function (position) {
+
+                setPoint(
+                    position.coords.latitude,
+                    position.coords.longitude
+                );
+
+                locateBtn.disabled = false;
+
+                if (locateBtnMap) {
+                    locateBtnMap.disabled = false;
+                }
+
+            },
+
+            function (error) {
+
+                message.textContent =
+                    "Unable to get location. Allow browser location permission or select a point on the map.";
+
+                locateBtn.disabled = false;
+
+                if (locateBtnMap) {
+                    locateBtnMap.disabled = false;
+                }
+
+            },
+
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+
+        );
+    }
+
+
+    locateBtn.addEventListener(
+        "click",
+        getCurrentLocation
+    );
+
+    if (locateBtnMap) {
+        locateBtnMap.addEventListener(
+            "click",
+            getCurrentLocation
+        );
+    }
+
+
+    // =====================================
+    // FIX MAP DISPLAY
+    // =====================================
+
+    setTimeout(function () {
+        map.invalidateSize();
+    }, 300);
+
+});
+</script>
+
+{% endblock %}
